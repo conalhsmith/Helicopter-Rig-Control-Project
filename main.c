@@ -169,6 +169,7 @@ int main(void) {
     SysCtlDelay(SysCtlClockGet() / 6);
     IntMasterEnable();
 
+    //Main Loop
     while (1) {
         updateButtons();
         currentYaw = getYawDegrees();
