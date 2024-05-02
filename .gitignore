@@ -9,4 +9,5 @@ Debug/*
 .project
 /Debug/
 /.metadata/
-/OrbitLed/
+OrbitOLED/*
+.jxbrowser.userdata/*
