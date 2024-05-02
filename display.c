@@ -35,7 +35,7 @@ void displayData(uint32_t altitude, int32_t yaw)
     OLEDStringDraw(string, 0, 1);
 
     // Display yaw
-    usnprintf(string, sizeof(string), "Yaw: %d.%d deg", yawInt, yawDec);
+    usnprintf(string, sizeof(string), "Yaw: %d.%d deg     ", yawInt, yawDec);
     OLEDStringDraw(string, 0, 3);
 }
 
