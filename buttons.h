@@ -1,18 +1,19 @@
-#ifndef BUTTONS_H_
-#define BUTTONS_H_
-
-// *******************************************************
-// buttons4.h
+//********************************************************************************
+//
+// File: buttons.h
+//
+// Authors: Conal Smith
+//          Adam Mason
 //
 // Support for a set of FOUR specific buttons on the Tiva/Orbit.
-// ENCE361 sample code.
 // The buttons are:  UP and DOWN (on the Orbit daughterboard) plus
 // LEFT and RIGHT on the Tiva.
 //
-// P.J. Bones UCECE
-// Last modified:  7.2.2018
-// 
-// *******************************************************
+//*********************************************************************************
+
+
+#ifndef BUTTONS_H_
+#define BUTTONS_H_
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -49,25 +50,31 @@ enum butStates {RELEASED = 0, PUSHED, NO_CHANGE};
 // read the pin in the opposite condition, before the state changes and
 // a flag is set.  Set NUM_BUT_POLLS according to the polling rate.
 
+
 // *******************************************************
 // initButtons: Initialise the variables associated with the set of buttons
 // defined by the constants above.
+//********************************************************
 void
 initButtons (void);
+
 
 // *******************************************************
 // updateButtons: Function designed to be called regularly. It polls all
 // buttons once and updates variables associated with the buttons if
 // necessary.  It is efficient enough to be part of an ISR, e.g. from
 // a SysTick interrupt.
+//********************************************************
 void
 updateButtons (void);
+
 
 // *******************************************************
 // checkButton: Function returns the new button state if the button state
 // (PUSHED or RELEASED) has changed since the last call, otherwise returns
 // NO_CHANGE.  The argument butName should be one of constants in the
 // enumeration butStates, excluding 'NUM_BUTS'. Safe under interrupt.
+//********************************************************
 uint8_t
 checkButton (uint8_t butName);
 

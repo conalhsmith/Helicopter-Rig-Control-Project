@@ -1,3 +1,14 @@
+//********************************************************************************
+//
+// File: uart.c
+//
+// Authors: Conal Smith
+//          Adam Mason
+//
+// Module for transmission support across a serial link using UART on the Tiva board
+// Uses 9600 baud, 8-bit words, 1 stop bit, no parity.
+//*********************************************************************************
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "inc/hw_memmap.h"
@@ -17,7 +28,9 @@
 #include "OrbitOLED/OrbitOLEDInterface.h"
 #include "buttons.h"
 
-
+//*********************************************************************************
+// Constants
+//*********************************************************************************
 #define BAUD_RATE 9600
 #define UART_USB_BASE           UART0_BASE
 #define UART_USB_PERIPH_UART    SYSCTL_PERIPH_UART0
@@ -27,6 +40,10 @@
 #define UART_USB_GPIO_PIN_TX    GPIO_PIN_1
 #define UART_USB_GPIO_PINS      UART_USB_GPIO_PIN_RX | UART_USB_GPIO_PIN_TX
 
+
+//*********************************************************************************
+// Initalises and configures the ports, peripherals and pins required for transmission
+//*********************************************************************************
 void initialiseUSB_UART(void)
 {
     // Enable GPIO port and UART peripheral
@@ -48,6 +65,9 @@ void initialiseUSB_UART(void)
     UARTEnable(UART_USB_BASE);
 }
 
+//*********************************************************************************
+// sends something
+//*********************************************************************************
 void UARTSend(char *pucBuffer)
 {
     while (*pucBuffer)

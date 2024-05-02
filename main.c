@@ -1,3 +1,13 @@
+//********************************************************************************
+//
+// File: main.c
+//
+// Authors: Conal Smith
+//          Adam Mason
+//
+//*********************************************************************************
+
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "inc/hw_memmap.h"
@@ -19,7 +29,12 @@
 #include "uart.h"
 #include "display.h"
 #include "altitude.h"
+#include "yaw.h"
 
+
+//*********************************************************************************
+// Constants
+//*********************************************************************************
 #define BUF_SIZE 32
 #define SAMPLE_RATE_HZ 150
 #define SLOWTICK_RATE_HZ 4
@@ -29,10 +44,9 @@ static uint32_t g_ulSampCnt;
 volatile uint8_t slowTick = false;
 
 
+
 //*****************************************************************************
-//
 // The interrupt handler for the for SysTick interrupt.
-//
 //*****************************************************************************
 void SysTickIntHandler(void) {
     ADCProcessorTrigger(ADC0_BASE, 3);
@@ -47,11 +61,10 @@ void SysTickIntHandler(void) {
     }
 }
 
+
 //*****************************************************************************
-//
 // The handler for the ADC conversion complete interrupt.
 // Writes to the circular buffer.
-//
 //*****************************************************************************
 void
 ADCIntHandler(void)
@@ -71,7 +84,7 @@ ADCIntHandler(void)
 }
 
 //*****************************************************************************
-// Initialisation functions for the clock (incl. SysTick), ADC, display, UART
+// Initialisation functions for the clock (incl. SysTick)
 //*****************************************************************************
 void
 initClock (void)
@@ -92,8 +105,10 @@ initClock (void)
     SysTickEnable();
 }
 
-void
-initADC (void)
+//*****************************************************************************
+// Initialisation functions for ADC
+//*****************************************************************************
+void initADC (void)
 {
     //
     // The ADC0 peripheral must be enabled for configuration and use.
@@ -129,17 +144,26 @@ initADC (void)
     ADCIntEnable(ADC0_BASE, 3);
 }
 
+
+
+//*****************************************************************************
+// Main Function
+//*****************************************************************************
 int main(void) {
+    // Variables for altitude and yaw
     int32_t helicopterLanded;
     int32_t currentAltitude = 0;
     uint8_t state = 0;
+    int16_t currentYaw = 0;
 
+    // Initialize system and peripherals
     initClock();
     initADC();
     initDisplay();
     initCircBuf(&g_inBuffer, BUF_SIZE);
     initialiseUSB_UART();
     initButtons();
+    initYaw();
     bool zero_ref = false;
 
     SysCtlDelay(SysCtlClockGet() / 6);
@@ -147,6 +171,7 @@ int main(void) {
 
     while (1) {
         updateButtons();
+        currentYaw = getYawDegrees();
 
         if (!zero_ref) {
             helicopterLanded = calculateAltitude(&g_inBuffer, BUF_SIZE);
@@ -189,7 +214,7 @@ int main(void) {
 
         if (state == 0) {
             int32_t altitudePercentage = altitudepercentage(currentAltitude);
-            displayAltitude(altitudePercentage);
+            displayData(altitudePercentage,currentYaw);
         }
 
         if (state == 1) {
