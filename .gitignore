@@ -8,3 +8,5 @@ Debug/*
 .cproject
 .project
 /Debug/
+/.metadata/
+/OrbitLed/
