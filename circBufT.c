@@ -10,22 +10,9 @@
 //
 //*********************************************************************************
 
-#ifndef CIRCBUFT_H_
-#define CIRCBUFT_H_
-
 #include <stdint.h>
-#include <stdbool.h>
-
-
-// *******************************************************
-// Buffer structure
-//********************************************************
-typedef struct {
-	uint32_t size;		// Number of entries in buffer
-	uint32_t windex;	// index for writing, mod(size)
-	uint32_t rindex;	// index for reading, mod(size)
-	uint32_t *data;		// pointer to the data
-} circBuf_t;
+#include "stdlib.h"
+#include "circBufT.h"
 
 
 // *******************************************************
@@ -35,7 +22,16 @@ typedef struct {
 // allocation fails.
 //********************************************************
 uint32_t *
-initCircBuf (circBuf_t *buffer, uint32_t size);
+initCircBuf (circBuf_t *buffer, uint32_t size)
+{
+	buffer->windex = 0;
+	buffer->rindex = 0;
+	buffer->size = size;
+	buffer->data = 
+        (uint32_t *) calloc (size, sizeof(uint32_t));
+	return buffer->data;
+}
+   // Note use of calloc() to clear contents.
 
 
 // *******************************************************
@@ -43,7 +39,13 @@ initCircBuf (circBuf_t *buffer, uint32_t size);
 // advance windex, modulo (buffer size).
 //********************************************************
 void
-writeCircBuf (circBuf_t *buffer, uint32_t entry);
+writeCircBuf (circBuf_t *buffer, uint32_t entry)
+{
+	buffer->data[buffer->windex] = entry;
+	buffer->windex++;
+	if (buffer->windex >= buffer->size)
+	   buffer->windex = 0;
+}
 
 
 // *******************************************************
@@ -52,15 +54,29 @@ writeCircBuf (circBuf_t *buffer, uint32_t entry);
 // if reading has advanced ahead of writing.
 //********************************************************
 uint32_t
-readCircBuf (circBuf_t *buffer);
-
+readCircBuf (circBuf_t *buffer)
+{
+	uint32_t entry;
+	
+	entry = buffer->data[buffer->rindex];
+	buffer->rindex++;
+	if (buffer->rindex >= buffer->size)
+	   buffer->rindex = 0;
+    return entry;
+}
 
 // *******************************************************
 // freeCircBuf: Releases the memory allocated to the buffer data,
-// sets pointer to NULL and other fields to 0. The buffer can
-// re initialised by another call to initCircBuf().
+// sets pointer to NULL and ohter fields to 0. The buffer can
+// re-initialised by another call to initCircBuf().
 //********************************************************
 void
-freeCircBuf (circBuf_t *buffer);
+freeCircBuf (circBuf_t * buffer)
+{
+	buffer->windex = 0;
+	buffer->rindex = 0;
+	buffer->size = 0;
+	free (buffer->data);
+	buffer->data = NULL;
+}
 
-#endif /*CIRCBUFT_H_*/
