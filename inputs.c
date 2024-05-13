@@ -1,6 +1,6 @@
 //********************************************************************************
 //
-// File: buttons.c
+// File: inputs.c
 //
 // Authors: Conal Smith
 //          Adam Mason
@@ -11,7 +11,7 @@
 //
 //*********************************************************************************
 
-#include <buttons.h>
+#include <inputs.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "inc/hw_memmap.h"
@@ -30,6 +30,8 @@ static uint8_t but_count[NUM_BUTS];
 static bool but_flag[NUM_BUTS];
 static bool but_normal[NUM_BUTS];   // Corresponds to the electrical state
 
+static bool switchUp;
+static bool switchChanged;
 
 // *******************************************************
 // initButtons: Initialise the variables associated with the set of buttons
@@ -139,4 +141,41 @@ checkButton (uint8_t butName)
 	}
 	return NO_CHANGE;
 }
+
+
+void
+initSwitch (void)
+{
+    // UP button (active HIGH)
+    SysCtlPeripheralEnable (SWITCH_PERIPH);
+    GPIOPinTypeGPIOInput (SWITCH_PORT_BASE, SWITCH_PIN);
+    GPIOPadConfigSet (SWITCH_PORT_BASE, SWITCH_PIN, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPD);
+    switchUp = GPIOPinRead(SWITCH_PORT_BASE, SWITCH_PIN) == SWITCH_PIN;
+}
+
+void
+updateSwitch (void)
+{
+    bool newPosition = GPIOPinRead(SWITCH_PORT_BASE, SWITCH_PIN) == SWITCH_PIN;
+    if (newPosition != switchUp) {
+        switchChanged = true;
+    }
+    switchUp = newPosition;
+}
+
+
+uint8_t
+checkSwitch (void)
+{
+    if (switchChanged) {
+        switchChanged = false;
+        if (switchUp) {
+            return SWITCH_UP;
+        } else {
+            return SWITCH_DOWN;
+        }
+    }
+    return SWITCH_NO_CHANGE;
+}
+
 
