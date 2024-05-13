@@ -27,4 +27,6 @@ void UARTSend(char *pucBuffer);
 //*********************************************************************************
 void initialiseUSB_UART(void);
 
+void uartSendStatus(uint32_t altitudepercentage, uint32_t altitudedesired, uint32_t yawpercentage, uint32_t yawdesired);
+
 #endif /* UART_H_ */

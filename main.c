@@ -8,6 +8,7 @@
 //*********************************************************************************
 
 
+#include <inputs.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "inc/hw_memmap.h"
@@ -25,11 +26,13 @@
 #include "utils/ustdlib.h"
 #include "circBufT.h"
 #include "OrbitOLED/OrbitOLEDInterface.h"
-#include "buttons.h"
 #include "uart.h"
 #include "display.h"
 #include "altitude.h"
 #include "yaw.h"
+#include "controller.h"
+#include "PWM.h"
+#include "inputs.h"
 
 
 //*********************************************************************************
@@ -43,7 +46,16 @@ static circBuf_t g_inBuffer;
 static uint32_t g_ulSampCnt;
 volatile uint8_t slowTick = false;
 
+//*********************************************************************************
+// Define states for helicopter mode
+//*********************************************************************************
 
+typedef enum {
+    LANDED,
+    TAKING_OFF,
+    HOVERING,
+    LANDING
+} HelicopterMode;
 
 //*****************************************************************************
 // The interrupt handler for the for SysTick interrupt.
@@ -153,8 +165,13 @@ int main(void) {
     // Variables for altitude and yaw
     int32_t helicopterLanded;
     int32_t currentAltitude = 0;
-    uint8_t state = 0;
     int16_t currentYaw = 0;
+
+    int32_t setAltitude = 0;
+    int16_t setYaw = 0;
+
+    int32_t takeoffAltitudeThreshold = 100;
+    int32_t landingAltitudeThreshold = 100;
 
     // Initialize system and peripherals
     initClock();
@@ -164,15 +181,25 @@ int main(void) {
     initialiseUSB_UART();
     initButtons();
     initYaw();
+    PWMMainInit();
+    PWMTailInit();
     bool zero_ref = false;
+    PWMSetMainRotorDutyCycle(50);
 
+    HelicopterMode mode = LANDED;
+
+    // delay for buffer to fill
     SysCtlDelay(SysCtlClockGet() / 6);
     IntMasterEnable();
 
-    //Main Loop
     while (1) {
+
+        // Update button states
         updateButtons();
         currentYaw = getYawDegrees();
+
+        // Check for slider switch state
+        uint8_t sliderState = checkSwitch();
 
         if (!zero_ref) {
             helicopterLanded = calculateAltitude(&g_inBuffer, BUF_SIZE);
@@ -181,47 +208,71 @@ int main(void) {
 
         currentAltitude = helicopterLanded - calculateAltitude(&g_inBuffer, BUF_SIZE);
 
-        uint8_t up_but_state = checkButton(UP);
-        uint8_t left_but_state = checkButton(LEFT);
+        // Handle helicopter mode based on slider switch state
+        switch (mode) {
 
-        switch (up_but_state) {
-            case PUSHED:
-                state++;
-                if (state == 3) {
-                    state = 0;
+            case LANDED:
+                if (sliderState == PUSHED) {
+                    mode = TAKING_OFF;
                 }
                 break;
-            case RELEASED:
-            case NO_CHANGE:
+
+            case TAKING_OFF:
+                // not really sure whats nessacary here
+                PWMSetMainRotorDutyCycle(50);
+                if (currentAltitude >= takeoffAltitudeThreshold) {
+                    mode = HOVERING;
+                }
+                break;
+
+            case HOVERING:
+                if (sliderState == RELEASED) {
+                    mode = LANDING;
+
+                }
+
+                uint8_t up_button_state = checkButton(UP);
+                uint8_t down_button_state = checkButton(DOWN);
+                uint8_t ccw_button_state = checkButton(LEFT);
+                uint8_t cw_button_state = checkButton(RIGHT);
+
+                if (up_button_state == PUSHED) {
+                    setAltitude += 10;
+                } else if (down_button_state == PUSHED) {
+                    setAltitude -= 10;
+                } else if (ccw_button_state == PUSHED) {
+                    setYaw -= 15;
+                } else if (cw_button_state == PUSHED) {
+                    setYaw += 15;
+                }
+
+                // Calculate PWM effort using altitude and yaw setpoints
+                int16_t altitudeEffort = AltitudePIDController(setAltitude, currentAltitude);
+                int16_t yawEffort = YawPIDController(setYaw, currentYaw);
+
+                // Apply PWM effort to rotor motors
+                PWMSetMainRotorDutyCycle(altitudeEffort);
+                PWMSetTailRotorDutyCycle(yawEffort);
+                break;
+
+            case LANDING:
+
+                PWMSetMainRotorDutyCycle(0);
+
+                if (currentAltitude <= landingAltitudeThreshold) {
+                    PWMSetMainRotorDutyCycle(0); // Stop main rotor
+                    PWMSetTailRotorDutyCycle(0); // Stop tail rotor
+                    mode = LANDED;
+                }
+                break;
             default:
                 break;
         }
 
-        switch (state) {
-            case 0:
-                break;
-            case 1:
-                break;
-            case 2:
-                cleardisplay();
-                break;
-            default:
-                break;
-        }
+        int32_t altitudePercentage = altitudepercentage(currentAltitude);
+        displayData(altitudePercentage,currentYaw);
 
-        if (left_but_state == PUSHED) {
-            zero_ref = false;
-        }
-
-        if (state == 0) {
-            int32_t altitudePercentage = altitudepercentage(currentAltitude);
-            displayData(altitudePercentage,currentYaw);
-        }
-
-        if (state == 1) {
-            int32_t meanADC = calculateAltitude(&g_inBuffer, BUF_SIZE);
-            displayADC(meanADC);
-        }
+        uartSendStatus(currentAltitude, setAltitude, currentYaw, setYaw);
 
         SysCtlDelay(SysCtlClockGet() / 30);
     }

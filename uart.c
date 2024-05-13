@@ -9,6 +9,7 @@
 // Uses 9600 baud, 8-bit words, 1 stop bit, no parity.
 //*********************************************************************************
 
+#include <inputs.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "inc/hw_memmap.h"
@@ -26,7 +27,6 @@
 #include "utils/ustdlib.h"
 #include "circBufT.h"
 #include "OrbitOLED/OrbitOLEDInterface.h"
-#include "buttons.h"
 
 //*********************************************************************************
 // Constants
@@ -39,6 +39,7 @@
 #define UART_USB_GPIO_PIN_RX    GPIO_PIN_0
 #define UART_USB_GPIO_PIN_TX    GPIO_PIN_1
 #define UART_USB_GPIO_PINS      UART_USB_GPIO_PIN_RX | UART_USB_GPIO_PIN_TX
+#define STR_LEN             18
 
 
 //*********************************************************************************
@@ -77,3 +78,17 @@ void UARTSend(char *pucBuffer)
     }
 }
 
+//*****************************************************************************
+// Transmits a message containing information about the status of the program.
+//*****************************************************************************
+void uartSendStatus(uint32_t altitudepercentage, uint32_t altitudedesired, uint32_t yawpercentage, uint32_t yawdesired) {
+    char line[STR_LEN + 1];
+
+    usnprintf(line, sizeof(line),
+              "Alt: %4d [%4d]\r\n", altitudepercentage, altitudedesired);
+    UARTSend(line);
+
+    usnprintf(line, sizeof(line),
+              "Yaw: %4d [%4d]\r\n", yawpercentage, yawdesired);
+    UARTSend(line);
+}
