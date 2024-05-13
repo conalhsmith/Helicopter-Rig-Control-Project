@@ -31,11 +31,11 @@ void PWMTailInit(void);
 //*****************************************************************************
 // Set duty cycle for main rotor motor
 //*****************************************************************************
-void PWMSetMainRotorDutyCycle(uint8_t dutyCyclePercent);
+void PWMSetMainRotorDutyCycle(uint32_t, uint32_t);
 
 //*****************************************************************************
 // Set duty cycle for tail rotor motor
 //*****************************************************************************
-void PWMSetTailRotorDutyCycle(uint8_t dutyCyclePercent);
+void PWMSetTailRotorDutyCycle(uint32_t, uint32_t);
 
 #endif /* PWM_H_ */

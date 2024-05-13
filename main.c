@@ -163,6 +163,17 @@ void initADC (void)
 //*****************************************************************************
 int main(void) {
     // Variables for altitude and yaw
+
+    uint32_t ui32Freq = 250;
+    initButtons();  // Initialises 4 pushbuttons (UP, DOWN, LEFT, RIGHT)
+    PWMMainInit();
+    PWMTailInit();
+    PWMOutputState(PWM0_BASE, PWM_OUT_7_BIT, true);
+    PWMOutputState(PWM1_BASE, PWM_OUT_5_BIT, true);
+    PWMSetMainRotorDutyCycle(ui32Freq, 50);
+    PWMSetTailRotorDutyCycle(ui32Freq, 50);
+
+
     int32_t helicopterLanded;
     int32_t currentAltitude = 0;
     int16_t currentYaw = 0;
@@ -181,11 +192,8 @@ int main(void) {
     initialiseUSB_UART();
     initButtons();
     initYaw();
-    PWMMainInit();
-    PWMTailInit();
     bool zero_ref = false;
-    PWMSetMainRotorDutyCycle(50);
-
+    uartSendStatus(currentAltitude, setAltitude, currentYaw, setYaw);
     HelicopterMode mode = LANDED;
 
     // delay for buffer to fill
@@ -219,7 +227,7 @@ int main(void) {
 
             case TAKING_OFF:
                 // not really sure whats nessacary here
-                PWMSetMainRotorDutyCycle(50);
+                //PWMSetMainRotorDutyCycle(50);
                 if (currentAltitude >= takeoffAltitudeThreshold) {
                     mode = HOVERING;
                 }
@@ -251,17 +259,17 @@ int main(void) {
                 int16_t yawEffort = YawPIDController(setYaw, currentYaw);
 
                 // Apply PWM effort to rotor motors
-                PWMSetMainRotorDutyCycle(altitudeEffort);
-                PWMSetTailRotorDutyCycle(yawEffort);
+                //PWMSetMainRotorDutyCycle(altitudeEffort);
+                //PWMSetTailRotorDutyCycle(yawEffort);
                 break;
 
             case LANDING:
 
-                PWMSetMainRotorDutyCycle(0);
+                //PWMSetMainRotorDutyCycle(0);
 
                 if (currentAltitude <= landingAltitudeThreshold) {
-                    PWMSetMainRotorDutyCycle(0); // Stop main rotor
-                    PWMSetTailRotorDutyCycle(0); // Stop tail rotor
+                    //PWMSetMainRotorDutyCycle(0); // Stop main rotor
+                    //PWMSetTailRotorDutyCycle(0); // Stop tail rotor
                     mode = LANDED;
                 }
                 break;
