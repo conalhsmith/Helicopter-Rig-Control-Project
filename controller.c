@@ -11,25 +11,35 @@
 #include "controller.h"
 #include <float.h>
 
+#define PWM_MAX_DUTY 95
+#define PWM_MAIN_MIN_DUTY 40
+#define PWM_TAIL_MIN_DUTY 20
+
+#define PWM_HOVER_DUTY 52
+
 // PID constants for yaw control
-#define YAW_KP 1.0
-#define YAW_KI 0.1
+#define YAW_KP 4
+#define YAW_KI 0.01
 #define YAW_KD 0.01
 
 // PID constants for altitude control
-#define ALTITUDE_KP 1.0
-#define ALTITUDE_KI 0.1
-#define ALTITUDE_KD 0.01
+#define ALTITUDE_KP 8
+#define ALTITUDE_KI 1
+#define ALTITUDE_KD 0.5
 
 // Variables to store previous error terms for PID calculation
-static float prev_yaw_error = 0.0;
-static float prev_altitude_error = 0.0;
+#define DELTA_T 10
+
+static float Aoutput = 0;
+
 
 //*****************************************************************************
 // PID controller for yaw control
 //*****************************************************************************
 float YawPIDController(float setpoint, float current_value)
 {
+    static float YI = 0;
+    static float prev_yaw_reading = 0;
     // Calculate error
     float error = setpoint - current_value;
 
@@ -37,18 +47,26 @@ float YawPIDController(float setpoint, float current_value)
     float P = YAW_KP * error;
 
     // Integral term
-    float I = YAW_KI * error;
+    float dI = YAW_KI * error * DELTA_T;
 
     // Derivative term
-    float D = YAW_KD * (error - prev_yaw_error);
+    float D = YAW_KD * (error - prev_yaw_reading) / DELTA_T;
 
     // Update previous error
-    prev_yaw_error = error;
+    prev_yaw_reading = current_value;
 
     // Calculate PID output
-    float output = P + I + D;
+    float Youtput = P + (YI+dI) + D + 0.8 * Aoutput;
 
-    return output;
+    if (Youtput > PWM_MAX_DUTY){
+        Youtput = PWM_MAX_DUTY;
+    } else if (Youtput < PWM_TAIL_MIN_DUTY) {
+        Youtput = PWM_TAIL_MIN_DUTY;
+    } else {
+        YI = (YI+dI);
+    }
+
+    return Youtput;
 }
 
 //*****************************************************************************
@@ -56,6 +74,8 @@ float YawPIDController(float setpoint, float current_value)
 //*****************************************************************************
 float AltitudePIDController(float setpoint, float current_value)
 {
+    static float AI = 0;
+    static float prev_alt_reading = 0;
     // Calculate error
     float error = setpoint - current_value;
 
@@ -63,17 +83,25 @@ float AltitudePIDController(float setpoint, float current_value)
     float P = ALTITUDE_KP * error;
 
     // Integral term
-    float I = ALTITUDE_KI * error;
+    float dI = ALTITUDE_KI * error * DELTA_T;
 
     // Derivative term
-    float D = ALTITUDE_KD * (error - prev_altitude_error);
+    float D = ALTITUDE_KD * (error - prev_alt_reading) / DELTA_T;
 
     // Update previous error
-    prev_altitude_error = error;
+    prev_alt_reading = current_value;
 
     // Calculate PID output
-    float output = P + I + D;
+    Aoutput = P + (AI+dI) + D + PWM_HOVER_DUTY;
 
-    return output;
+    if (Aoutput > PWM_MAX_DUTY){
+        Aoutput = PWM_MAX_DUTY;
+    } else if (Aoutput < PWM_MAIN_MIN_DUTY) {
+        Aoutput = PWM_MAIN_MIN_DUTY;
+    } else {
+        AI = (AI+dI);
+    }
+
+    return Aoutput;
 }
 

@@ -75,7 +75,7 @@ void YawIntHandler(void)
     }
 
     //check if yaw reset needed
-    ResetYaw();
+    //ResetYaw();
 
     //set previous channel state as current channel state
     ChannelAPrev = ChannelAActive;
