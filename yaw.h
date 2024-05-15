@@ -29,7 +29,7 @@ void initYaw(void);
 //*********************************************************************************
 // Converts the yaw value into degrees
 //*********************************************************************************
-int16_t getYawDegrees(void);
+float getYawDegrees(void);
 
 //*********************************************************************************
 // Resets yaw value based if it reaches max yaw in either direction.

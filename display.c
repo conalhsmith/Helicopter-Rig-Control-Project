@@ -27,15 +27,14 @@ void displayData(uint32_t altitude, int32_t yaw)
 {
     char string[17];  // 16 characters across the display
 
-    int32_t yawInt = yaw / 10;
-    int32_t yawDec = abs(yaw % 10);
+    int32_t yawInt = yaw;
 
     // Display altitude
     usnprintf(string, sizeof(string), "Altitude: %5d%%", altitude);
     OLEDStringDraw(string, 0, 1);
 
     // Display yaw
-    usnprintf(string, sizeof(string), "Yaw: %d.%d deg     ", yawInt, yawDec);
+    usnprintf(string, sizeof(string), "Yaw: %d deg     ", yawInt);
     OLEDStringDraw(string, 0, 3);
 }
 

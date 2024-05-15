@@ -116,9 +116,9 @@ void initYaw(void)
 
 
 //*********************************************************************************
-// Converts the yaw value into 10 * degrees
+// Converts the yaw value into degrees
 //*********************************************************************************
-int16_t getYawDegrees(void)
+float getYawDegrees(void)
 {
-    return ((10 * yaw * DEGREES_CIRCLE) / NUM_SLOTS / YAW_PER_SLOT);
+    return ((yaw * DEGREES_CIRCLE) / NUM_SLOTS / YAW_PER_SLOT);
 }

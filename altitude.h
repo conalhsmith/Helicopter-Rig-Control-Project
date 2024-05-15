@@ -26,6 +26,6 @@ int32_t calculateAltitude(circBuf_t *buffer, uint16_t BUF_SIZE);
 //*********************************************************************************
 // Converts the altitude to a percentage value.
 //*********************************************************************************
-int32_t altitudepercentage(int32_t currentAltitude);
+float altitudepercentage(int32_t currentAltitude);
 
 #endif /* ALTITUDE_H_ */

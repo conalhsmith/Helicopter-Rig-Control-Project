@@ -171,8 +171,8 @@ int main(void) {
     PWMOutputState(PWM1_BASE, PWM_OUT_5_BIT, true);
 
     int32_t helicopterLanded = 0;
-    int32_t currentAltitude = 0;
-    int16_t currentYaw = 0;
+    float currentAltitude = 0;
+    float currentYaw = 0;
 
     int32_t setAltitude = 0;
     int16_t setYaw = 0;
@@ -273,8 +273,9 @@ int main(void) {
 
                 setAltitude = 0;
 
-                PWMSetMainRotorDutyCycle(ui32Freq, 47);
-                PWMSetTailRotorDutyCycle(ui32Freq, 47);
+                int16_t yawEffortLanding = YawPIDController(setYaw, currentYaw);
+                PWMSetTailRotorDutyCycle(ui32Freq, yawEffortLanding);
+                PWMSetMainRotorDutyCycle(ui32Freq, 40);
 
                 if (currentAltitude <= landingAltitudeThreshold) {
                     PWMSetMainRotorDutyCycle(ui32Freq, 0);
@@ -290,7 +291,6 @@ int main(void) {
 
         uartSendStatus(altitudePercentage, setAltitude, currentYaw, setYaw);
 
-        SysCtlDelay(SysCtlClockGet() / 30);
     }
 }
 
