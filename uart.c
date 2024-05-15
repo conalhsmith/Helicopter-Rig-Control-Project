@@ -26,6 +26,8 @@
 #include "driverlib/pin_map.h"
 #include "utils/ustdlib.h"
 #include "circBufT.h"
+#include "altitude.h"
+#include "yaw.h"
 #include "OrbitOLED/OrbitOLEDInterface.h"
 
 //*********************************************************************************
@@ -81,14 +83,14 @@ void UARTSend(char *pucBuffer)
 //*****************************************************************************
 // Transmits a message containing information about the status of the program.
 //*****************************************************************************
-void uartSendStatus(uint32_t altitudepercentage, uint32_t altitudedesired, uint32_t yawpercentage, uint32_t yawdesired) {
+void uartSendStatus(uint32_t altitudedesired, uint32_t yawdesired) {
     char line[STR_LEN + 1];
 
     usnprintf(line, sizeof(line),
-              "Alt: %4d [%4d]\r\n", altitudepercentage, altitudedesired);
+              "Alt: %4d [%4d]\r\n", getAltitudePercentage(), altitudedesired);
     UARTSend(line);
 
     usnprintf(line, sizeof(line),
-              "Yaw: %4d [%4d]\r\n", yawpercentage, yawdesired);
+              "Yaw: %4d [%4d]\r\n", getYawDegrees(), yawdesired);
     UARTSend(line);
 }

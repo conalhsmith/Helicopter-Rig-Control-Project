@@ -23,6 +23,7 @@
 
 #define PWM_FREQUENCY_MIN   150  // Minimum PWM frequency in Hz
 #define PWM_FREQUENCY_MAX   300  // Maximum PWM frequency in Hz
+#define PWM_DIVIDER 4 // PWM divider
 
 //*****************************************************************************
 // Initialize PWM modules for main rotor and tail rotor motors
@@ -41,8 +42,7 @@ void PWMMainInit(void)
 
     PWMGenEnable(PWM0_BASE, PWM_GEN_3);
 
-    // Disable the output.  Repeat this call with 'true' to turn O/P on.
-    PWMOutputState(PWM0_BASE, PWM_OUT_7_BIT, false);
+    PWMOutputState(PWM0_BASE, PWM_OUT_7_BIT, true);
 }
 
 
@@ -60,8 +60,7 @@ void PWMTailInit(void)
 
     PWMGenEnable(PWM1_BASE, PWM_GEN_2);
 
-    // Disable the output.  Repeat this call with 'true' to turn O/P on.
-    PWMOutputState(PWM1_BASE, PWM_OUT_5_BIT, false);
+    PWMOutputState(PWM1_BASE, PWM_OUT_5_BIT, true);
 }
 
 
@@ -71,7 +70,7 @@ void PWMTailInit(void)
 void PWMSetMainRotorDutyCycle(uint32_t ui32Freq, uint32_t ui32Duty)
 {
 
-    uint32_t ui32Period = SysCtlClockGet() / 4 / ui32Freq;
+    uint32_t ui32Period = SysCtlClockGet() / PWM_DIVIDER / ui32Freq;
 
     // Calculate duty cycle value based on percentage
     PWMGenPeriodSet(PWM0_BASE, PWM_GEN_3, ui32Period);
@@ -85,7 +84,7 @@ void PWMSetMainRotorDutyCycle(uint32_t ui32Freq, uint32_t ui32Duty)
 //*****************************************************************************
 void PWMSetTailRotorDutyCycle(uint32_t ui32Freq, uint32_t ui32Duty)
 {
-    uint32_t ui32Period = SysCtlClockGet() / 4 / ui32Freq;
+    uint32_t ui32Period = SysCtlClockGet() / PWM_DIVIDER / ui32Freq;
 
     // Calculate duty cycle value based on percentage
     PWMGenPeriodSet(PWM1_BASE, PWM_GEN_2, ui32Period);

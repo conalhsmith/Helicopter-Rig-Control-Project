@@ -38,11 +38,10 @@
 //*********************************************************************************
 // Constants
 //*********************************************************************************
-#define BUF_SIZE 32
 #define SAMPLE_RATE_HZ 150
 #define SLOWTICK_RATE_HZ 4
+#define PWM_FREQUENCY 250
 
-static circBuf_t g_inBuffer;
 static uint32_t g_ulSampCnt;
 volatile uint8_t slowTick = false;
 
@@ -78,22 +77,7 @@ void SysTickIntHandler(void) {
 // The handler for the ADC conversion complete interrupt.
 // Writes to the circular buffer.
 //*****************************************************************************
-void
-ADCIntHandler(void)
-{
-    uint32_t ulValue;
 
-    //
-    // Get the single sample from ADC0.  ADC_BASE is defined in
-    // inc/hw_memmap.h
-    ADCSequenceDataGet(ADC0_BASE, 3, &ulValue);
-    //
-    // Place it in the circular buffer (advancing write index)
-    writeCircBuf (&g_inBuffer, ulValue);
-    //
-    // Clean up, clearing the interrupt
-    ADCIntClear(ADC0_BASE, 3);
-}
 
 //*****************************************************************************
 // Initialisation functions for the clock (incl. SysTick)
@@ -117,62 +101,27 @@ initClock (void)
     SysTickEnable();
 }
 
-//*****************************************************************************
-// Initialisation functions for ADC
-//*****************************************************************************
-void initADC (void)
-{
-    //
-    // The ADC0 peripheral must be enabled for configuration and use.
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
-
-    // Enable sample sequence 3 with a processor signal trigger.  Sequence 3
-    // will do a single sample when the processor sends a signal to start the
-    // conversion.
-    ADCSequenceConfigure(ADC0_BASE, 3, ADC_TRIGGER_PROCESSOR, 0);
-
-    //
-    // Configure step 0 on sequence 3.  Sample channel 0 (ADC_CTL_CH0) in
-    // single-ended mode (default) and configure the interrupt flag
-    // (ADC_CTL_IE) to be set when the sample is done.  Tell the ADC logic
-    // that this is the last conversion on sequence 3 (ADC_CTL_END).  Sequence
-    // 3 has only one programmable step.  Sequence 1 and 2 have 4 steps, and
-    // sequence 0 has 8 programmable steps.  Since we are only doing a single
-    // conversion using sequence 3 we will only configure step 0.  For more
-    // on the ADC sequences and steps, refer to the LM3S1968 datasheet.
-    ADCSequenceStepConfigure(ADC0_BASE, 3, 0, ADC_CTL_CH9 | ADC_CTL_IE |
-                             ADC_CTL_END);
-
-    //
-    // Since sample sequence 3 is now configured, it must be enabled.
-    ADCSequenceEnable(ADC0_BASE, 3);
-
-    //
-    // Register the interrupt handler
-    ADCIntRegister (ADC0_BASE, 3, ADCIntHandler);
-
-    //
-    // Enable interrupts for ADC0 sequence 3 (clears any outstanding interrupts)
-    ADCIntEnable(ADC0_BASE, 3);
-}
-
 
 
 //*****************************************************************************
 // Main Function
 //*****************************************************************************
 int main(void) {
-    // Variables for altitude and yaw
 
-    uint32_t ui32Freq = 250;
+
+    // Initialize system and peripherals
     PWMMainInit();
     PWMTailInit();
-    PWMOutputState(PWM0_BASE, PWM_OUT_7_BIT, true);
-    PWMOutputState(PWM1_BASE, PWM_OUT_5_BIT, true);
+    initClock();
+    initAltitude();
+    initDisplay();
+    initialiseUSB_UART();
+    initButtons();
+    initSwitch();
+    initYaw();
 
-    int32_t helicopterLanded = 0;
-    float currentAltitude = 0;
-    float currentYaw = 0;
+    float CurrentAltitudePercentage = 0;
+    float currentYawDegrees = 0;
 
     int32_t setAltitude = 0;
     int16_t setYaw = 0;
@@ -180,21 +129,9 @@ int main(void) {
     int32_t takeoffAltitudeThreshold = 1;
     int32_t landingAltitudeThreshold = 1;
 
-    // Initialize system and peripherals
-    initClock();
-    initADC();
-    initDisplay();
-    initCircBuf(&g_inBuffer, BUF_SIZE);
-    initialiseUSB_UART();
-    initButtons();
-    initSwitch();
-    initYaw();
-    bool zero_ref = false;
-    uartSendStatus(currentAltitude, setAltitude, currentYaw, setYaw);
     HelicopterMode mode = LANDED;
-
-    // delay for buffer to fill
     SysCtlDelay(SysCtlClockGet() / 6);
+    referenceAltitude();
     IntMasterEnable();
 
     while (1) {
@@ -202,18 +139,14 @@ int main(void) {
         // Update button states
         updateButtons();
         updateSwitch();
-        currentYaw = getYawDegrees();
+
 
         // Check for slider switch state
         uint8_t sliderState = checkSwitch();
 
-        if (!zero_ref) {
-            helicopterLanded = calculateAltitude(&g_inBuffer, BUF_SIZE);
-            zero_ref = true;
-        }
 
-        currentAltitude = helicopterLanded - calculateAltitude(&g_inBuffer, BUF_SIZE);
-        int32_t altitudePercentage = altitudepercentage(currentAltitude);
+        CurrentAltitudePercentage = getAltitudePercentage();
+        currentYawDegrees = getYawDegrees();
 
         // Handle helicopter mode based on slider switch state
 
@@ -227,8 +160,8 @@ int main(void) {
                 break;
 
             case TAKING_OFF:
-                PWMSetMainRotorDutyCycle(ui32Freq, 60);
-                if (currentAltitude >= takeoffAltitudeThreshold) {
+                PWMSetMainRotorDutyCycle(PWM_FREQUENCY, 60);
+                if (CurrentAltitudePercentage >= takeoffAltitudeThreshold) {
                     mode = HOVERING;
                 }
                 break;
@@ -261,25 +194,25 @@ int main(void) {
                 }
 
                 // Calculate PWM effort using altitude and yaw setpoints
-                int16_t altitudeEffort = AltitudePIDController(setAltitude, altitudePercentage);
-                int16_t yawEffort = YawPIDController(setYaw, currentYaw);
+                int16_t altitudeEffort = AltitudePIDController(setAltitude, CurrentAltitudePercentage);
+                int16_t yawEffort = YawPIDController(setYaw, currentYawDegrees);
 
                 // Apply PWM effort to rotor motors
-                PWMSetMainRotorDutyCycle(ui32Freq, altitudeEffort);
-                PWMSetTailRotorDutyCycle(ui32Freq, yawEffort);
+                PWMSetMainRotorDutyCycle(PWM_FREQUENCY, altitudeEffort);
+                PWMSetTailRotorDutyCycle(PWM_FREQUENCY, yawEffort);
                 break;
 
             case LANDING:
 
                 setAltitude = 0;
 
-                int16_t yawEffortLanding = YawPIDController(setYaw, currentYaw);
-                PWMSetTailRotorDutyCycle(ui32Freq, yawEffortLanding);
-                PWMSetMainRotorDutyCycle(ui32Freq, 40);
+                int16_t yawEffortLanding = YawPIDController(setYaw, currentYawDegrees);
+                PWMSetTailRotorDutyCycle(PWM_FREQUENCY, yawEffortLanding);
+                PWMSetMainRotorDutyCycle(PWM_FREQUENCY, 40);
 
-                if (currentAltitude <= landingAltitudeThreshold) {
-                    PWMSetMainRotorDutyCycle(ui32Freq, 0);
-                    PWMSetTailRotorDutyCycle(ui32Freq, 0);
+                if (CurrentAltitudePercentage <= landingAltitudeThreshold) {
+                    PWMSetMainRotorDutyCycle(PWM_FREQUENCY, 0);
+                    PWMSetTailRotorDutyCycle(PWM_FREQUENCY, 0);
                     mode = LANDED;
                 }
                 break;
@@ -287,9 +220,9 @@ int main(void) {
                 break;
         }
 
-        displayData(altitudePercentage,currentYaw);
+        displayData();
 
-        uartSendStatus(altitudePercentage, setAltitude, currentYaw, setYaw);
+        uartSendStatus(setAltitude,setYaw);
 
     }
 }

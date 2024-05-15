@@ -10,6 +10,7 @@
 
 #include "controller.h"
 #include <float.h>
+#include <stdint.h>
 
 #define PWM_MAX_DUTY 80
 #define PWM_MAIN_MIN_DUTY 40
@@ -18,7 +19,7 @@
 #define PWM_HOVER_DUTY 52
 
 // PID constants for yaw control
-#define YAW_KP 5
+#define YAW_KP 4.5
 #define YAW_KI 0.5
 #define YAW_KD 0.5
 
@@ -29,16 +30,17 @@
 
 // Variables to store previous error terms for PID calculation
 #define DELTA_T (1 / 150)
+#define K_COUPLING 0.8
 
-static float Aoutput = 0;
-
+static float AltitudeControl = 0;
+static float YawControl = 0;
 
 //*****************************************************************************
 // PID controller for yaw control
 //*****************************************************************************
 float YawPIDController(float setpoint, float current_value)
 {
-    static float YI = 0;
+    static float YawI = 0;
     static float prev_yaw_reading = 0;
     // Calculate error
     float error = setpoint - current_value;
@@ -56,17 +58,17 @@ float YawPIDController(float setpoint, float current_value)
     prev_yaw_reading = current_value;
 
     // Calculate PID output
-    float Youtput = P + (YI+dI) + D + 0.8 * Aoutput;
+    YawControl = P + (YawI+dI) + D + K_COUPLING * AltitudeControl;
 
-    if (Youtput > PWM_MAX_DUTY){
-        Youtput = PWM_MAX_DUTY;
-    } else if (Youtput < PWM_TAIL_MIN_DUTY) {
-        Youtput = PWM_TAIL_MIN_DUTY;
+    if (YawControl > PWM_MAX_DUTY){
+        YawControl = PWM_MAX_DUTY;
+    } else if (YawControl < PWM_TAIL_MIN_DUTY) {
+        YawControl = PWM_TAIL_MIN_DUTY;
     } else {
-        YI = (YI+dI);
+        YawI = (YawI+dI);
     }
 
-    return Youtput;
+    return YawControl;
 }
 
 //*****************************************************************************
@@ -74,7 +76,7 @@ float YawPIDController(float setpoint, float current_value)
 //*****************************************************************************
 float AltitudePIDController(float setpoint, float current_value)
 {
-    static float AI = 0;
+    static float AltI = 0;
     static float prev_alt_reading = 0;
     // Calculate error
     float error = setpoint - current_value;
@@ -92,16 +94,27 @@ float AltitudePIDController(float setpoint, float current_value)
     prev_alt_reading = current_value;
 
     // Calculate PID output
-    Aoutput = P + (AI+dI) + D + PWM_HOVER_DUTY;
+    AltitudeControl = P + (AltI+dI) + D + PWM_HOVER_DUTY;
 
-    if (Aoutput > PWM_MAX_DUTY){
-        Aoutput = PWM_MAX_DUTY;
-    } else if (Aoutput < PWM_MAIN_MIN_DUTY) {
-        Aoutput = PWM_MAIN_MIN_DUTY;
+    if (AltitudeControl > PWM_MAX_DUTY){
+        AltitudeControl = PWM_MAX_DUTY;
+    } else if (AltitudeControl < PWM_MAIN_MIN_DUTY) {
+        AltitudeControl = PWM_MAIN_MIN_DUTY;
     } else {
-        AI = (AI+dI);
+        AltI = (AltI+dI);
     }
 
-    return Aoutput;
+    return AltitudeControl;
 }
 
+uint32_t getYawDuty(void)
+{
+    uint32_t yawDuty = YawControl;
+    return yawDuty;
+}
+
+uint32_t getAltitudeDuty(void)
+{
+    uint32_t altitudeDuty = AltitudeControl;
+    return altitudeDuty;
+}

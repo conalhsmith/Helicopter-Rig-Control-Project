@@ -63,7 +63,7 @@ enum switchStates {SWITCH_DOWN = 0, SWITCH_UP, SWITCH_NO_CHANGE};
 // defined by the constants above.
 //********************************************************
 void
-initButtons (void);
+initButtons(void);
 
 
 // *******************************************************
@@ -73,7 +73,7 @@ initButtons (void);
 // a SysTick interrupt.
 //********************************************************
 void
-updateButtons (void);
+updateButtons(void);
 
 
 // *******************************************************
@@ -83,7 +83,7 @@ updateButtons (void);
 // enumeration butStates, excluding 'NUM_BUTS'. Safe under interrupt.
 //********************************************************
 uint8_t
-checkButton (uint8_t butName);
+checkButton (uint8_t);
 
 // *******************************************************
 // initButtons: Initialise the variables associated with the set of buttons

@@ -21,11 +21,19 @@
 //*********************************************************************************
 // Calculates the altitude by taking the average values stored in the buffer.
 //*********************************************************************************
-int32_t calculateAltitude(circBuf_t *buffer, uint16_t BUF_SIZE);
+int32_t calculateAltitude(circBuf_t *buffer);
 
 //*********************************************************************************
 // Converts the altitude to a percentage value.
 //*********************************************************************************
-float altitudepercentage(int32_t currentAltitude);
+float getAltitudePercentage();
+
+
+void initAltitude(void);
+
+void initADC(void);
+void ADCIntHandler(void);
+void referenceAltitude(void);
+
 
 #endif /* ALTITUDE_H_ */

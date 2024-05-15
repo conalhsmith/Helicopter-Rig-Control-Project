@@ -13,22 +13,13 @@
 #define DISPLAY_H_
 
 #include <stdint.h>
-#include <stdbool.h>
+
 
 //*****************************************************************************
 // Function to display the altitude as a percentage and yaw in degrees
 //*****************************************************************************
-void displayData(uint32_t altitude, int32_t yaw);
+void displayData();
 
-//*****************************************************************************
-// Function to display the mean ADC value (10-bit value, note) and sample count.
-//*****************************************************************************
-void displayADC(uint32_t adc);
-
-//*****************************************************************************
-// Function to clear the screen
-//*****************************************************************************
-void cleardisplay(void);
 
 //*****************************************************************************
 // Function to initialise the OLED display
