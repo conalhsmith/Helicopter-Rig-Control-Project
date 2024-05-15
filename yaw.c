@@ -30,6 +30,9 @@
 #define YAW_PER_SLOT 4 //yaw per slot
 #define MAX_YAW 224 //corresponds to 180 degrees
 
+
+#define YAW_REFERENCE_PIN_C GPIO_PIN_4
+
 volatile int32_t yaw = 0;
 volatile int32_t degrees = 0;
 
@@ -107,6 +110,7 @@ void initYaw(void)
     SysCtlPeripheralEnable(YAW_PERIPH);
     GPIOPinTypeGPIOInput(YAW_PORT_BASE, YAW_PIN_A | YAW_PIN_B);
     GPIOPadConfigSet(YAW_PORT_BASE, YAW_PIN_A | YAW_PIN_B, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
 
     GPIOIntDisable(YAW_PORT_BASE, YAW_PIN_A | YAW_PIN_B);
     GPIOIntClear(YAW_PORT_BASE, YAW_PIN_A | YAW_PIN_B);
