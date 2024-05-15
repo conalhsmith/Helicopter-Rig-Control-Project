@@ -41,6 +41,7 @@
 #define SAMPLE_RATE_HZ 150
 #define SLOWTICK_RATE_HZ 4
 #define PWM_FREQUENCY 250
+#define LANDINGALTITUDETHRESHOLD 1
 
 static uint32_t g_ulSampCnt;
 volatile uint8_t slowTick = false;
@@ -126,9 +127,6 @@ int main(void) {
     int32_t setAltitude = 0;
     int16_t setYaw = 0;
 
-    int32_t takeoffAltitudeThreshold = 1;
-    int32_t landingAltitudeThreshold = 1;
-
     HelicopterMode mode = LANDED;
     SysCtlDelay(SysCtlClockGet() / 6);
     referenceAltitude();
@@ -160,8 +158,9 @@ int main(void) {
                 break;
 
             case TAKING_OFF:
-                PWMSetMainRotorDutyCycle(PWM_FREQUENCY, 60);
-                if (CurrentAltitudePercentage >= takeoffAltitudeThreshold) {
+                PWMSetTailRotorDutyCycle(PWM_FREQUENCY, 44);
+                if (CheckReferencePin()) {
+                    ResetYawToZero();
                     mode = HOVERING;
                 }
                 break;
@@ -204,24 +203,25 @@ int main(void) {
 
             case LANDING:
 
-                setAltitude = 0;
-
+                setYaw = 0;
                 int16_t yawEffortLanding = YawPIDController(setYaw, currentYawDegrees);
-                PWMSetTailRotorDutyCycle(PWM_FREQUENCY, yawEffortLanding);
-                PWMSetMainRotorDutyCycle(PWM_FREQUENCY, 40);
+                int16_t altitudeEffortLanding = AltitudePIDController(setAltitude, CurrentAltitudePercentage);
 
-                if (CurrentAltitudePercentage <= landingAltitudeThreshold) {
-                    PWMSetMainRotorDutyCycle(PWM_FREQUENCY, 0);
-                    PWMSetTailRotorDutyCycle(PWM_FREQUENCY, 0);
-                    mode = LANDED;
+                PWMSetTailRotorDutyCycle(PWM_FREQUENCY, yawEffortLanding);
+                PWMSetMainRotorDutyCycle(PWM_FREQUENCY, altitudeEffortLanding);
+
+                if (CheckReferencePin()) {
+                    setAltitude = 0;
+                    if (CurrentAltitudePercentage <= LANDINGALTITUDETHRESHOLD) {
+                        PWMSetMainRotorDutyCycle(PWM_FREQUENCY, 0);
+                        PWMSetTailRotorDutyCycle(PWM_FREQUENCY, 0);
+                        mode = LANDED;
+                    }
                 }
-                break;
-            default:
                 break;
         }
 
         displayData();
-
         uartSendStatus(setAltitude,setYaw);
 
     }

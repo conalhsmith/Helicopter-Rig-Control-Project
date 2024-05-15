@@ -14,7 +14,7 @@
 
 #define PWM_MAX_DUTY 80
 #define PWM_MAIN_MIN_DUTY 40
-#define PWM_TAIL_MIN_DUTY 15
+#define PWM_TAIL_MIN_DUTY 10
 
 #define PWM_HOVER_DUTY 52
 

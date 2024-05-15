@@ -32,7 +32,7 @@
 
 
 #define YAW_REFERENCE_PIN_C GPIO_PIN_4
-
+#define YAW_REFERENCE_PORT_BASE GPIO_PORTC_BASE
 volatile int32_t yaw = 0;
 volatile int32_t degrees = 0;
 
@@ -101,6 +101,16 @@ void ResetYaw(void)
         }
 }
 
+//*********************************************************************************
+// Returns true if the helicopter is on the reference pin
+//*********************************************************************************
+
+bool CheckReferencePin(void)
+{
+    return GPIOPinRead(GPIO_PORTC_BASE, YAW_REFERENCE_PIN_C) == 0;
+}
+
+
 
 //*********************************************************************************
 // Inititiates the interupt and required ports for then yaw module.
@@ -110,7 +120,10 @@ void initYaw(void)
     SysCtlPeripheralEnable(YAW_PERIPH);
     GPIOPinTypeGPIOInput(YAW_PORT_BASE, YAW_PIN_A | YAW_PIN_B);
     GPIOPadConfigSet(YAW_PORT_BASE, YAW_PIN_A | YAW_PIN_B, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
+    GPIOPinTypeGPIOInput(YAW_REFERENCE_PORT_BASE, YAW_REFERENCE_PIN_C);
+
 
     GPIOIntDisable(YAW_PORT_BASE, YAW_PIN_A | YAW_PIN_B);
     GPIOIntClear(YAW_PORT_BASE, YAW_PIN_A | YAW_PIN_B);
@@ -126,4 +139,12 @@ void initYaw(void)
 float getYawDegrees(void)
 {
     return ((yaw * DEGREES_CIRCLE) / NUM_SLOTS / YAW_PER_SLOT);
+}
+
+//*********************************************************************************
+// resets yaw to 0
+//*********************************************************************************
+void ResetYawToZero(void)
+{
+    yaw = 0;
 }

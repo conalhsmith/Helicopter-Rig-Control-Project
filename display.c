@@ -44,13 +44,10 @@ void displayData()
     usnprintf(string, sizeof(string), "Yaw: %d deg     ", yaw);
     OLEDStringDraw(string, 0, 2);
 
-    // Display main motor duty cycle
-    usnprintf(string, sizeof(string), "Tail rotor: %5d%%", getYawDuty());
-    OLEDStringDraw(string, 0, 3);
 
-    // Display tail motor duty cycle
-    usnprintf(string, sizeof(string), "Main rotor: %d%%      ", getAltitudeDuty());
-    OLEDStringDraw(string, 0, 4);
+    // Display motor duty cycle's
+    usnprintf(string, sizeof(string), "Main:%d%% Tail:%d%%", getAltitudeDuty(), getYawDuty());
+    OLEDStringDraw(string, 0, 3);
 
 }
 
