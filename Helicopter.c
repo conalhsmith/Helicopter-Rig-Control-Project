@@ -5,6 +5,7 @@
 // Authors: Conal Smith
 //          Adam Mason
 //
+// This module contains some code from the labs and lectures on learn
 //*********************************************************************************
 
 
@@ -53,6 +54,7 @@ volatile uint8_t slowTick = false;
 
 //*****************************************************************************
 // The interrupt handler for the for SysTick interrupt.
+// Code template taken from lectures/lab on learn
 //*****************************************************************************
 void SysTickIntHandler(void) {
     ADCProcessorTrigger(ADC0_BASE, 3);
@@ -70,6 +72,7 @@ void SysTickIntHandler(void) {
 
 //*****************************************************************************
 // Initialisation functions for the clock (incl. SysTick)
+// Code template taken from lectures/lab on learn
 //*****************************************************************************
 void
 initClock (void)

@@ -9,7 +9,9 @@
 // The buttons are:  UP and DOWN (on the Orbit daughterboard) plus
 // LEFT and RIGHT on the Tiva.
 // The switch is SWITCH 1 o the Orbit board.
-
+//
+// This module contains some code from the labs and lectures on learn
+//
 //*********************************************************************************
 
 #include <inputs.h>
@@ -37,6 +39,7 @@ static bool switchChanged;
 // *******************************************************
 // initButtons: Initialise the variables associated with the set of buttons
 // defined by the constants in the buttons2.h header file.
+// Code template taken from lectures/lab on learn
 // *******************************************************
 void initButtons (void)
 {
@@ -88,6 +91,7 @@ void initButtons (void)
 // buttons once and updates variables associated with the buttons if
 // necessary.  It is efficient enough to be part of an ISR, e.g. from
 // a SysTick interrupt.
+// Code template taken from lectures/lab on learn
 // *******************************************************
 void updateButtons (void)
 {
@@ -122,6 +126,7 @@ void updateButtons (void)
 // checkButton: Function returns the new button logical state if the button
 // logical state (PUSHED or RELEASED) has changed since the last call,
 // otherwise returns NO_CHANGE.
+// Code template taken from lectures/lab on learn
 // *******************************************************
 uint8_t checkButton (uint8_t butName)
 {

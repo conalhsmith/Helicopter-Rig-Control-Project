@@ -8,6 +8,8 @@
 // Module for measuring the altitude value from the circular buffer and converting
 // to a percentage.
 //
+// This module contains some code from the labs and lectures on learn
+//
 //*********************************************************************************
 
 
@@ -38,6 +40,7 @@ void initAltitude(void);
 
 //*********************************************************************************
 // initalises ADC
+// Code template taken from lectures on learn
 //*********************************************************************************
 void initADC(void);
 
@@ -45,6 +48,7 @@ void initADC(void);
 //*****************************************************************************
 // The handler for the ADC conversion complete interrupt.
 // Writes to the circular buffer.
+// Code template taken from lectures on learn
 //*****************************************************************************
 void ADCIntHandler(void);
 

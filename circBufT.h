@@ -8,6 +8,8 @@
 // Module to provide support for a circular buffer of uint32_t values on the
 // Tiva processor.
 //
+// This module consists entirely of code from the labs and lectures on learn
+//
 //*********************************************************************************
 
 #ifndef CIRCBUFT_H_

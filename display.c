@@ -7,7 +7,9 @@
 //
 // Module for displaying the current yaw and altitude properties
 // aswell as the  current duty cycles for both the main and tail rotors.
-
+//
+// This module contains some code from the labs and lectures on learn
+//
 //*********************************************************************************
 
 #include "display.h"

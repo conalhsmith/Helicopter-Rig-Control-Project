@@ -9,7 +9,9 @@
 // The buttons are:  UP and DOWN (on the Orbit daughterboard) plus
 // LEFT and RIGHT on the Tiva.
 // The switch is SWITCH 1 o the Orbit board.
-
+//
+// This module contains some code from the labs and lectures on learn
+//
 //*********************************************************************************
 
 #ifndef INPUTS_H_
@@ -61,6 +63,7 @@ enum switchStates {SWITCH_DOWN = 0, SWITCH_UP, SWITCH_NO_CHANGE};
 // *******************************************************
 // initButtons: Initialise the variables associated with the set of buttons
 // defined by the constants above.
+// Code template taken from lectures/lab on learn
 //********************************************************
 void initButtons(void);
 
@@ -70,6 +73,7 @@ void initButtons(void);
 // buttons once and updates variables associated with the buttons if
 // necessary.  It is efficient enough to be part of an ISR, e.g. from
 // a SysTick interrupt.
+// Code template taken from lectures/lab on learn
 //********************************************************
 void updateButtons(void);
 
@@ -79,6 +83,7 @@ void updateButtons(void);
 // (PUSHED or RELEASED) has changed since the last call, otherwise returns
 // NO_CHANGE.  The argument butName should be one of constants in the
 // enumeration butStates, excluding 'NUM_BUTS'. Safe under interrupt.
+// Code template taken from lectures/lab on learn
 //********************************************************
 uint8_t checkButton (uint8_t);
 

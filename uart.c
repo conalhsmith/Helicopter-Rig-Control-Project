@@ -7,6 +7,9 @@
 //
 // Module for transmission support across a serial link using UART on the Tiva board
 // Uses 9600 baud, 8-bit words, 1 stop bit, no parity.
+//
+// This module contains some code from the labs and lectures on learn
+//
 //*********************************************************************************
 
 
@@ -49,6 +52,7 @@
 
 //*********************************************************************************
 // Initalises and configures the ports, peripherals and pins required for transmission
+// Code template taken from lectures on learn
 //*********************************************************************************
 void initialiseUSB_UART(void)
 {
@@ -73,6 +77,7 @@ void initialiseUSB_UART(void)
 
 //*********************************************************************************
 // Sends a string via UART.
+// Code template taken from lectures on learn
 //*********************************************************************************
 void UARTSend(char *pucBuffer)
 {
@@ -85,6 +90,7 @@ void UARTSend(char *pucBuffer)
 
 //*****************************************************************************
 // Transmits a message containing information about the status of the program.
+// Code template taken from lectures on learn
 //*****************************************************************************
 void uartSendStatus(uint32_t altitudedesired, uint32_t yawdesired) {
 
