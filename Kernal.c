@@ -28,7 +28,7 @@
 #define LANDING_ALTITUDE_THRESHOLD 1
 #define ALTITUDE_STEP 10 //amount altitude changes per button press (%)
 #define YAW_STEP 15 //amount yaw changes per button press (degrees)
-#define TAKEOFF_DUTY 45
+#define TAKEOFF_DUTY 40
 
 //*********************************************************************************
 // Static varibles for both current and desired yaw and altitude

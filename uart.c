@@ -28,6 +28,7 @@
 #include "circBufT.h"
 #include "altitude.h"
 #include "controller.h"
+#include "kernal.h"
 #include <inputs.h>
 #include "yaw.h"
 #include "OrbitOLED/OrbitOLEDInterface.h"
@@ -86,25 +87,28 @@ void UARTSend(char *pucBuffer)
 // Transmits a message containing information about the status of the program.
 //*****************************************************************************
 void uartSendStatus(uint32_t altitudedesired, uint32_t yawdesired) {
+
     char line[STR_LEN + 1];
 
     //send altitude status
+    int32_t alt = getAltitudePercentage();
     usnprintf(line, sizeof(line),
-              "Desired Altitude: %4d Actual Altitude: %4d\r\n", altitudedesired, getAltitudePercentage());
+              "Alt: %4d [%4d]\r\n",alt, altitudedesired);
     UARTSend(line);
 
     //send yaw status
+    int32_t yaw = getYawDegrees();
     usnprintf(line, sizeof(line),
-              "Desired Yaw: %4d Actual Yaw: %4d\r\n", yawdesired, getYawDegrees());
+              "Yaw: %4d [%4d]\r\n", yaw, yawdesired);
     UARTSend(line);
 
     //send main rotor duty
     usnprintf(line, sizeof(line),
-              "Main rotor duty: %4d %\r\n", getAltitudeDuty());
+              "Main: %4d%%\r\n", getAltitudeDuty());
     UARTSend(line);
 
     //send tail rotor duty
     usnprintf(line, sizeof(line),
-              "Tail rotor duty: %4d %\r\n", getYawDuty());
+              "Tail: %4d%%\r\n", getYawDuty());
     UARTSend(line);
 }
