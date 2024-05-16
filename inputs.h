@@ -5,12 +5,12 @@
 // Authors: Conal Smith
 //          Adam Mason
 //
-// Support for a set of FOUR specific buttons on the Tiva/Orbit.
+// Support for a set of FOUR specific buttons and ONE switch on the Tiva/Orbit.
 // The buttons are:  UP and DOWN (on the Orbit daughterboard) plus
 // LEFT and RIGHT on the Tiva.
-//
-//*********************************************************************************
+// The switch is SWITCH 1 o the Orbit board.
 
+//*********************************************************************************
 
 #ifndef INPUTS_H_
 #define INPUTS_H_
@@ -62,8 +62,7 @@ enum switchStates {SWITCH_DOWN = 0, SWITCH_UP, SWITCH_NO_CHANGE};
 // initButtons: Initialise the variables associated with the set of buttons
 // defined by the constants above.
 //********************************************************
-void
-initButtons(void);
+void initButtons(void);
 
 
 // *******************************************************
@@ -72,8 +71,7 @@ initButtons(void);
 // necessary.  It is efficient enough to be part of an ISR, e.g. from
 // a SysTick interrupt.
 //********************************************************
-void
-updateButtons(void);
+void updateButtons(void);
 
 
 // *******************************************************
@@ -82,34 +80,25 @@ updateButtons(void);
 // NO_CHANGE.  The argument butName should be one of constants in the
 // enumeration butStates, excluding 'NUM_BUTS'. Safe under interrupt.
 //********************************************************
-uint8_t
-checkButton (uint8_t);
-
-// *******************************************************
-// initButtons: Initialise the variables associated with the set of buttons
-// defined by the constants above.
-//********************************************************
-void
-initSwitch (void);
+uint8_t checkButton (uint8_t);
 
 
-// *******************************************************
-// updateButtons: Function designed to be called regularly. It polls all
-// buttons once and updates variables associated with the buttons if
-// necessary.  It is efficient enough to be part of an ISR, e.g. from
-// a SysTick interrupt.
-//********************************************************
-void
-updateSwitch (void);
+//*********************************************************************************
+// Initalises the switch 1 on the Orbit daughterboard
+//*********************************************************************************
+void initSwitch (void);
 
 
-// *******************************************************
-// checkButton: Function returns the new button state if the button state
-// (PUSHED or RELEASED) has changed since the last call, otherwise returns
-// NO_CHANGE.  The argument butName should be one of constants in the
-// enumeration butStates, excluding 'NUM_BUTS'. Safe under interrupt.
-//********************************************************
-uint8_t
-checkSwitch (void);
+//*********************************************************************************
+// Detects changes to switch 1 on the Orbit daughterboard and flags Switch Changed
+//*********************************************************************************
+void updateSwitch (void);
+
+
+//*********************************************************************************
+// Returns current state of switch
+//*********************************************************************************
+uint8_t checkSwitch (void);
+
 
 #endif /*INPUTS_H_*/

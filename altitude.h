@@ -21,7 +21,8 @@
 //*********************************************************************************
 // Calculates the altitude by taking the average values stored in the buffer.
 //*********************************************************************************
-int32_t calculateAltitude(circBuf_t *buffer);
+int32_t calculateAltitude(circBuf_t *);
+
 
 //*********************************************************************************
 // Converts the altitude to a percentage value.
@@ -29,10 +30,28 @@ int32_t calculateAltitude(circBuf_t *buffer);
 float getAltitudePercentage();
 
 
+//*********************************************************************************
+// initalises functions for altitude
+//*********************************************************************************
 void initAltitude(void);
 
+
+//*********************************************************************************
+// initalises ADC
+//*********************************************************************************
 void initADC(void);
+
+
+//*****************************************************************************
+// The handler for the ADC conversion complete interrupt.
+// Writes to the circular buffer.
+//*****************************************************************************
 void ADCIntHandler(void);
+
+
+//*********************************************************************************
+// Finds ADC value at start up and sets this too landed reference
+//*********************************************************************************
 void referenceAltitude(void);
 
 

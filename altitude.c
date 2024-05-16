@@ -18,8 +18,12 @@
 #include "circBufT.h"
 #include <stdint.h>
 
+
+//*********************************************************************************
+// Static variables
+//*********************************************************************************
 static circBuf_t g_inBuffer;
-static int32_t helicopterLanded = 0;
+static int32_t helicopterLanded = 0; //Reference altitude (value of landed altitude)
 
 
 //*********************************************************************************
@@ -27,15 +31,24 @@ static int32_t helicopterLanded = 0;
 //*********************************************************************************
 #define ADC_CONSTANT 1241  // range of ADC values in 1 volt (4095 / 3.3).
 #define BUF_SIZE 32
+#define DELAY_DIVIDER 6
 
 
-
+//*********************************************************************************
+// initalises functions for altitude including the circular buffer and ADC
+//*********************************************************************************
 void initAltitude(void)
 {
     initCircBuf(&g_inBuffer, BUF_SIZE);
     initADC();
+    SysCtlDelay(SysCtlClockGet() / DELAY_DIVIDER); // delay to fill buffer on first start
+    referenceAltitude(); // Finds ADC value at start up and sets this too landed reference
 }
 
+
+//*********************************************************************************
+// initalises ADC for altitude input
+//*********************************************************************************
 void initADC(void)
 {
     //
@@ -72,6 +85,11 @@ void initADC(void)
     ADCIntEnable(ADC0_BASE, 3);
 }
 
+
+//*****************************************************************************
+// The handler for the ADC conversion complete interrupt.
+// Writes to the circular buffer.
+//*****************************************************************************
 void ADCIntHandler(void)
 {
     uint32_t ulValue;
@@ -105,16 +123,20 @@ int32_t calculateAltitude(circBuf_t *buffer)
     return ((2 * sum + BUF_SIZE) / 2 / BUF_SIZE);
 }
 
+
 //*********************************************************************************
 // Converts the altitude to a percentage value.
 //*********************************************************************************
 float getAltitudePercentage()
 {
-    float current = helicopterLanded - calculateAltitude(&g_inBuffer);
+    float current = helicopterLanded - calculateAltitude(&g_inBuffer); //normalise altitude using reference
     return (100 * current / ADC_CONSTANT);
 }
 
 
+//*********************************************************************************
+// Finds ADC value at start up and sets this too landed reference
+//*********************************************************************************
 void referenceAltitude(void)
 {
     helicopterLanded = calculateAltitude(&g_inBuffer);

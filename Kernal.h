@@ -1,50 +1,52 @@
 //********************************************************************************
 //
-// File: yaw.h
+// File: kernal.h
 //
 // Authors: Conal Smith
 //          Adam Mason
 //
-// Module to handle finite state machine and interupt handler for yaw and convert to degrees.
+// Module for handling the scheduling of each task, aswell as calling other modules
+// to perform the tasks.
 //
 //*********************************************************************************
+#ifndef KERNEL_H
+#define KERNEL_H
 
-
-#ifndef YAW_H_
-#define YAW_H_
-
+#include <FlightState.h>
 #include <stdint.h>
-#include <stdbool.h>
+#include "PWM.h"
+#include "altitude.h"
+#include "yaw.h"
 
 
 //*********************************************************************************
-// Finite state machine for encoder position.
+// Handles the takeoff routine for the helicopter
 //*********************************************************************************
-void YawIntHandler(void);
-
-
-//*********************************************************************************
-// Inititiates the interupt and required ports for then yaw module.
-//*********************************************************************************
-void initYaw(void);
+void handleTakeOff(HelicopterMode *mode);
 
 
 //*********************************************************************************
-// Converts the yaw value into degrees
+// Handles the hovering routine for the helicopter
 //*********************************************************************************
-float getYawDegrees(void);
-
-
-//*********************************************************************************
-// Returns true if the helicopter is on the reference pin
-//*********************************************************************************
-bool CheckReferencePin(void);
+void handleHovering(HelicopterMode *mode, uint8_t sliderState);
 
 
 //*********************************************************************************
-// resets yaw to 0
+// Handles the landing routine for the helicopter
 //*********************************************************************************
-void ResetYawToZero(void);
+void handleLanding(HelicopterMode *mode);
 
 
-#endif /* YAW_H_ */
+//*********************************************************************************
+// Schedules the state machine
+//*********************************************************************************
+void scheduler();
+
+
+//*********************************************************************************
+// Checks button inputs and adjusts setpoint accordingly
+//*********************************************************************************
+void checkButtons(void);
+
+
+#endif /* KERNEL_H */

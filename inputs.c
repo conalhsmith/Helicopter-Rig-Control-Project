@@ -5,10 +5,11 @@
 // Authors: Conal Smith
 //          Adam Mason
 //
-// Support for a set of FOUR specific buttons on the Tiva/Orbit.
+// Support for a set of FOUR specific buttons and ONE switch on the Tiva/Orbit.
 // The buttons are:  UP and DOWN (on the Orbit daughterboard) plus
 // LEFT and RIGHT on the Tiva.
-//
+// The switch is SWITCH 1 o the Orbit board.
+
 //*********************************************************************************
 
 #include <inputs.h>
@@ -37,8 +38,7 @@ static bool switchChanged;
 // initButtons: Initialise the variables associated with the set of buttons
 // defined by the constants in the buttons2.h header file.
 // *******************************************************
-void
-initButtons (void)
+void initButtons (void)
 {
 	int i;
 
@@ -88,13 +88,8 @@ initButtons (void)
 // buttons once and updates variables associated with the buttons if
 // necessary.  It is efficient enough to be part of an ISR, e.g. from
 // a SysTick interrupt.
-// Debounce algorithm: A state machine is associated with each button.
-// A state change occurs only after NUM_BUT_POLLS consecutive polls have
-// read the pin in the opposite condition, before the state changes and
-// a flag is set.  Set NUM_BUT_POLLS according to the polling rate.
 // *******************************************************
-void
-updateButtons (void)
+void updateButtons (void)
 {
 	bool but_value[NUM_BUTS];
 	int i;
@@ -128,8 +123,7 @@ updateButtons (void)
 // logical state (PUSHED or RELEASED) has changed since the last call,
 // otherwise returns NO_CHANGE.
 // *******************************************************
-uint8_t
-checkButton (uint8_t butName)
+uint8_t checkButton (uint8_t butName)
 {
 	if (but_flag[butName])
 	{
@@ -143,8 +137,10 @@ checkButton (uint8_t butName)
 }
 
 
-void
-initSwitch (void)
+//*********************************************************************************
+// Initalises the switch 1 on the Orbit daughterboard
+//*********************************************************************************
+void initSwitch (void)
 {
     // UP button (active HIGH)
     SysCtlPeripheralEnable (SWITCH_PERIPH);
@@ -153,8 +149,11 @@ initSwitch (void)
     switchUp = GPIOPinRead(SWITCH_PORT_BASE, SWITCH_PIN) == SWITCH_PIN;
 }
 
-void
-updateSwitch (void)
+
+//*********************************************************************************
+// Detects changes to switch 1 on the Orbit daughterboard and flags Switch Changed
+//*********************************************************************************
+void updateSwitch (void)
 {
     bool newPosition = GPIOPinRead(SWITCH_PORT_BASE, SWITCH_PIN) == SWITCH_PIN;
     if (newPosition != switchUp) {
@@ -164,8 +163,10 @@ updateSwitch (void)
 }
 
 
-uint8_t
-checkSwitch (void)
+//*********************************************************************************
+// Returns current state of switch
+//*********************************************************************************
+uint8_t checkSwitch (void)
 {
     if (switchChanged) {
         switchChanged = false;

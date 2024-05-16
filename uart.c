@@ -9,7 +9,7 @@
 // Uses 9600 baud, 8-bit words, 1 stop bit, no parity.
 //*********************************************************************************
 
-#include <inputs.h>
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "inc/hw_memmap.h"
@@ -27,6 +27,8 @@
 #include "utils/ustdlib.h"
 #include "circBufT.h"
 #include "altitude.h"
+#include "controller.h"
+#include <inputs.h>
 #include "yaw.h"
 #include "OrbitOLED/OrbitOLEDInterface.h"
 
@@ -69,7 +71,7 @@ void initialiseUSB_UART(void)
 }
 
 //*********************************************************************************
-// sends something
+// Sends a string via UART.
 //*********************************************************************************
 void UARTSend(char *pucBuffer)
 {
@@ -86,11 +88,23 @@ void UARTSend(char *pucBuffer)
 void uartSendStatus(uint32_t altitudedesired, uint32_t yawdesired) {
     char line[STR_LEN + 1];
 
+    //send altitude status
     usnprintf(line, sizeof(line),
-              "Alt: %4d [%4d]\r\n", getAltitudePercentage(), altitudedesired);
+              "Desired Altitude: %4d Actual Altitude: %4d\r\n", altitudedesired, getAltitudePercentage());
     UARTSend(line);
 
+    //send yaw status
     usnprintf(line, sizeof(line),
-              "Yaw: %4d [%4d]\r\n", getYawDegrees(), yawdesired);
+              "Desired Yaw: %4d Actual Yaw: %4d\r\n", yawdesired, getYawDegrees());
+    UARTSend(line);
+
+    //send main rotor duty
+    usnprintf(line, sizeof(line),
+              "Main rotor duty: %4d %\r\n", getAltitudeDuty());
+    UARTSend(line);
+
+    //send tail rotor duty
+    usnprintf(line, sizeof(line),
+              "Tail rotor duty: %4d %\r\n", getYawDuty());
     UARTSend(line);
 }

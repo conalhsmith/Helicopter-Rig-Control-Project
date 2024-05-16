@@ -6,7 +6,8 @@
 //          Adam Mason
 //
 // Module for displaying the current yaw and altitude properties
-//
+// aswell as the  current duty cycles for both the main and tail rotors.
+
 //*********************************************************************************
 
 #ifndef DISPLAY_H_

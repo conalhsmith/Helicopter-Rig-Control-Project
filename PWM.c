@@ -2,7 +2,7 @@
 //
 // File: PWM.c
 //
-// Authors: [Your Name]
+// Authors: Conal Smith, Adam Mason
 //
 // Module for generating PWM signals for main rotor and tail rotor motors
 //
@@ -21,12 +21,16 @@
 #include "driverlib/interrupt.h"
 
 
+//*****************************************************************************
+// constants
+//*****************************************************************************
 #define PWM_FREQUENCY_MIN   150  // Minimum PWM frequency in Hz
 #define PWM_FREQUENCY_MAX   300  // Maximum PWM frequency in Hz
 #define PWM_DIVIDER 4 // PWM divider
 
+
 //*****************************************************************************
-// Initialize PWM modules for main rotor and tail rotor motors
+// Initialize PWM module for main rotor
 //*****************************************************************************
 void PWMMainInit(void)
 {
@@ -46,6 +50,9 @@ void PWMMainInit(void)
 }
 
 
+//*****************************************************************************
+// Initialize PWM module for tail rotor
+//*****************************************************************************
 void PWMTailInit(void)
 {
     // Enable PWM peripherals

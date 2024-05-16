@@ -17,7 +17,7 @@
 
 
 //*********************************************************************************
-// sends something
+// Sends a string via UART.
 //*********************************************************************************
 void UARTSend(char *pucBuffer);
 
@@ -27,6 +27,11 @@ void UARTSend(char *pucBuffer);
 //*********************************************************************************
 void initialiseUSB_UART(void);
 
+
+//*****************************************************************************
+// Transmits a message containing information about the status of the program.
+//*****************************************************************************
 void uartSendStatus(uint32_t, uint32_t);
+
 
 #endif /* UART_H_ */

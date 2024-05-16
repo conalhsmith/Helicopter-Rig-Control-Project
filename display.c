@@ -6,7 +6,8 @@
 //          Adam Mason
 //
 // Module for displaying the current yaw and altitude properties
-//
+// aswell as the  current duty cycles for both the main and tail rotors.
+
 //*********************************************************************************
 
 #include "display.h"
@@ -25,13 +26,12 @@ void initDisplay(void) {
     OLEDInitialise();
 }
 
-
 //*****************************************************************************
 // Function to display the altitude as a percentage and yaw in degrees
 //*****************************************************************************
 void displayData()
 {
-    char string[17];  // 16 characters across the display
+    char string[17];
 
     // Display altitude
     int32_t altitude = getAltitudePercentage();
